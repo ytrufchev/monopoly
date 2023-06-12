@@ -4,11 +4,11 @@ public class Player {
     private int position;
     private boolean inJail;
 
-    private int ind;
+    private boolean isEliminated;
 
     public Player(String name) {
         this.name = name;
-        this.balance = 1500;
+        this.balance = 150;
         this.position = 0;
     }
 
@@ -27,11 +27,11 @@ public class Player {
     public void setPosition(int position) {
         this.position = position;
     }
-    public void setInd(int ind){
-        this.ind = ind;
+    public boolean isEliminated(){
+        return isEliminated;
     }
-    public int getInd() {
-        return ind;
+    public void setIsEliminated() {
+        this.isEliminated = true;
     }
 
     public void addBalance(int amount) {
@@ -39,8 +39,10 @@ public class Player {
     }
 
     public void deductBalance(int amount) {
-        if( balance - amount < 0){
+        if( balance - amount <= 0){
             balance = 0;
+            setIsEliminated();
+            System.out.println("******\n" + this.name + " is eliminated\n******");
         }
         else {
             balance -= amount;

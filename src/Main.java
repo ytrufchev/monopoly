@@ -7,7 +7,6 @@ public class Main {
         System.out.print("Enter the number of players (2-4): ");
         int numPlayers = scanner.nextInt();
         scanner.nextLine();
-
         Player[] players = new Player[numPlayers];
 
         for (int i = 0; i < numPlayers; i++) {
@@ -18,7 +17,7 @@ public class Main {
             players[i] = player;
         }
 
-        Game game = new Game(players);
+        Game game = new Game(players, numPlayers);
         while (!game.isGameOver()) {
             game.playTurn();
         }

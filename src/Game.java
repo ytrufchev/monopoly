@@ -1,3 +1,5 @@
+import java.sql.SQLOutput;
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -9,7 +11,7 @@ public class Game {
     private int currentPlayerIndex;
     private int[] jailTurns;
 
-    public Game(Player[] players) {
+    public Game(Player[] players, int numPlayers) {
         this.players = players;
         this.board = Board.initializeTiles();
         this.dice = new Dice();
@@ -18,112 +20,68 @@ public class Game {
     }
 
     public void playTurn() {
-        Scanner scanner = new Scanner(System.in);
         Player currentPlayer = players[currentPlayerIndex];
-        currentPlayer.setInd(currentPlayerIndex);
-        System.out.println("It's " + currentPlayer.getName() + "'s turn and he has $" + currentPlayer.getBalance());
-        System.out.println("Press enter to roll the dice");
-        scanner.nextLine();
-        if (currentPlayer.isInJail()) {
-            handleJailLogic(currentPlayer);
-        } else {
+        System.out.println(currentPlayer.isEliminated());
+        String name = currentPlayer.getName();
+        int location = currentPlayer.getPosition();
+        int balance = currentPlayer.getBalance();
+        boolean isInJail = currentPlayer.isInJail();
+        if (!currentPlayer.isEliminated()) {
+            if (isInJail) {
+                handleJailLogic(currentPlayer);
+            }
+            System.out.println("\nIt is " + name + "'s turn you have $" + balance + " press enter to roll the dice");
+            Scanner sc = new Scanner(System.in);
+            sc.nextLine();
             int[] rolls = dice.rollTwoDice();
             int totalRoll = rolls[0] + rolls[1];
-            System.out.println(currentPlayer.getName() + " rolled " + rolls[0] + " and " + rolls[1] + " (total: " + totalRoll + ").");
-
-            int newPosition = (currentPlayer.getPosition() + totalRoll) % board.length;
-            if(newPosition < currentPlayer.getPosition()){
-                currentPlayer.setPosition(newPosition);
+            System.out.println(name + " rolled " + rolls[0] + " and " + rolls[1] + " (total: " + totalRoll + ").");
+            int newPosition = (location + totalRoll) % board.length;
+            if (newPosition < location) {
                 currentPlayer.addBalance(200);
+                System.out.println(currentPlayer.getName() + " gets $200 for passing GO and now has " + balance);
                 System.out.println(currentPlayer.getName() + " landed on " + board[newPosition].getName() + ".");
-                System.out.println(currentPlayer.getName() + " gets $200 for passing GO and now has "+currentPlayer.getBalance());
-            }
-            else {
+            } else {
                 currentPlayer.setPosition(newPosition);
-                System.out.println(currentPlayer.getName() + " landed on " + board[newPosition].getName() + ".");
+                System.out.println(name + " landed on " + board[newPosition].getName() + ".");
             }
             if (board[newPosition].getType() == 1) {
-                currentPlayer.setInJail(true);
-                currentPlayer.setPosition(board[newPosition].getTileNumber());
-                System.out.println(currentPlayer.getName() + " is in jail.");
-                jailTurns[currentPlayerIndex] = 0;
-            } else if (board[newPosition].getType() == 2) {
-                int taxAmount = 100;
-                System.out.println(currentPlayer.getName() + " must pay Tax of $" + taxAmount + ".");
-                currentPlayer.deductBalance(taxAmount);
-            }
-            else if (board[newPosition].getType() == 4) {
-                int[] amounts = {-500, -200, -100, -50, 50, 100, 200, 500};
-                Random random = new Random();
-                int randomNumber = random.nextInt(8);
-                if(amounts[randomNumber] < 0){
-                    System.out.println("You must pay $"+ Math.abs(amounts[randomNumber]));
-                    currentPlayer.deductBalance(Math.abs(amounts[randomNumber]));
-                }
-                else{
-                    System.out.println("You get $"+ Math.abs(amounts[randomNumber]));
-                    currentPlayer.addBalance(Math.abs(amounts[randomNumber]));
-                }
-            }else if (board[newPosition].getType() == 0) {
                 currentPlayer.setPosition(newPosition);
-
-                if (board[newPosition].getType() == 0) {
-                    String propertyName = board[newPosition].getName();
-                    int propertyPrice = board[newPosition].getPrice();
-                    int propertyRent = board[newPosition].getRent();
-                    String owner = board[newPosition].getOwner();
-                    if (owner.equals("")) {
-                        System.out.println("This property is not owned by anyone.");
-                        System.out.println("Do you want to buy it for $" + propertyPrice + "? (Y/N)");
-
-                        Scanner sc = new Scanner(System.in);
-                        String choice = sc.nextLine();
-
-                        if (choice.equalsIgnoreCase("Y")) {
-                            if (currentPlayer.getBalance() >= propertyPrice) {
-                                currentPlayer.deductBalance(propertyPrice);
-                                board[newPosition].setOwner(currentPlayer.getName().toString());
-                                System.out.println(currentPlayer.getName() + " has purchased " + propertyName + ".");
-                            } else {
-                                System.out.println("Insufficient funds to purchase the property.");
-                            }
-                        }
-                    } else if (owner != currentPlayer.getName() && board[newPosition].getType() == 0) {
-                        int rent = board[newPosition].getRent();
-                        String propertyOwner = board[newPosition].getOwner();
-                        System.out.println(propertyOwner);
-                        int ownerIndex = -1;
-
-                        for (int i = 0; i < players.length; i++) {
-                            if (players[i].getName().equals(owner)) {
-                                ownerIndex = i;
-                                break;
-                            }
-                        }
-
-                        if (ownerIndex != currentPlayerIndex && ownerIndex != -1) {
-                            System.out.println("This property is owned by " + players[ownerIndex].getName() + ".");
-                            System.out.println(currentPlayer.getName() + " must pay $" + rent + " as rent to " + propertyOwner + ".");
-                            currentPlayer.deductBalance(rent);
-                            players[ownerIndex].addBalance(rent);
-                            System.out.println(currentPlayer.getName() + " payed $" + board[newPosition].getRent() + " to " + propertyOwner);
-                        }
-                    }
-                }
+                goToJail(currentPlayerIndex);
+            } else if (board[newPosition].getType() == 2) {
+                currentPlayer.setPosition(newPosition);
+                payTax(currentPlayerIndex);
+            } else if (board[newPosition].getType() == 4) {
+                currentPlayer.setPosition(newPosition);
+                chance(currentPlayerIndex);
+            } else if (board[newPosition].getType() == 0) {
+                currentPlayer.setPosition(newPosition);
+                buyableProperty(currentPlayerIndex, newPosition);
             }
         }
-
         currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
     }
 
     public boolean isGameOver() {
-        Player currentPlayer = players[currentPlayerIndex];
-        if (currentPlayer.getBalance() <= 0) {
-            System.out.println(currentPlayer.getName() + "'s balance reached 0 and they are eliminated.");
+        int remainingPlayers = 0;
+        String winnerName = "";
+
+        for (Player player : players) {
+            if (!player.isEliminated()) {
+                remainingPlayers++;
+                winnerName = player.getName();
+            }
+        }
+
+        if (remainingPlayers <= 1) {
+            System.out.println("Game Over! The winner is " + winnerName + "!");
             return true;
         }
+
         return false;
     }
+
+
 
     private void handleJailLogic(Player currentPlayer) {
         if (jailTurns[currentPlayerIndex] == 3) {
@@ -146,6 +104,70 @@ public class Game {
             } else {
                 System.out.println(currentPlayer.getName() + " failed to roll doubles and remains in jail.");
                 jailTurns[currentPlayerIndex]++;
+            }
+        }
+    }
+
+    public void goToJail(int index) {
+        Player currentPlayer = players[index];
+        currentPlayer.setInJail(true);
+        currentPlayer.setPosition(board[10].getTileNumber());
+        System.out.println(currentPlayer.getName() + " is in jail.");
+        jailTurns[currentPlayerIndex] = 0;
+    }
+
+    public void payTax(int index) {
+        Player currentPlayer = players[index];
+        int taxAmount = 100;
+        System.out.println(currentPlayer.getName() + " must pay Tax of $" + taxAmount + ".");
+        currentPlayer.deductBalance(taxAmount);
+    }
+
+    public void chance(int index) {
+        Player currentPlayer = players[index];
+        int[] amounts = {-500, -200, -100, -50, 50, 100, 200, 500};
+        Random random = new Random();
+        int randomNumber = random.nextInt(8);
+        int amount = Math.abs(amounts[randomNumber]);
+        if (amounts[randomNumber] < 0) {
+            System.out.println("You must pay $" + amount);
+            currentPlayer.deductBalance(amount);
+        } else {
+            System.out.println("You get $" + amount);
+            currentPlayer.addBalance(amount);
+        }
+    }
+
+    public void buyableProperty(int index, int location) {
+        Player currentPlayer = players[index];
+        Board tile = board[location];
+        String propertyName = tile.getName();
+        int propertyPrice = tile.getPrice();
+        int owner = tile.getOwner();
+        if (owner == -1 && currentPlayer.getBalance() > tile.getPrice()) {
+            System.out.println("This property is not owned by anyone.");
+            System.out.println("Do you want to buy it for $" + propertyPrice + "? (Y/N)");
+
+            Scanner sc = new Scanner(System.in);
+            String choice = sc.nextLine();
+
+            if (choice.equalsIgnoreCase("Y")) {
+                if (currentPlayer.getBalance() >= propertyPrice) {
+                    currentPlayer.deductBalance(propertyPrice);
+                    tile.setOwner(index);
+                    System.out.println(currentPlayer.getName() + " has purchased " + propertyName + ".");
+                } else {
+                    System.out.println("Insufficient funds to purchase the property.");
+                }
+            }
+        } else if (owner != currentPlayerIndex && tile.getType() == 0 ) {
+            int rent = board[location].getRent();
+            if (tile.getOwner() != currentPlayerIndex && tile.getOwner() != -1) {
+                System.out.println("This property is owned by " + players[tile.getOwner()].getName() + ".");
+                System.out.println(currentPlayer.getName() + " must pay $" + rent + " as rent to " + players[tile.getOwner()].getName() + ".");
+                currentPlayer.deductBalance(rent);
+                players[tile.getOwner()].addBalance(rent);
+                System.out.println(currentPlayer.getName() + " payed $" + board[location].getRent() + " to " + players[tile.getOwner()].getName());
             }
         }
     }
