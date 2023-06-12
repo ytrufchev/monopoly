@@ -9,19 +9,17 @@ public class Game {
     private Dice dice;
 
     private int currentPlayerIndex;
-    private int[] jailTurns;
+    private int jailTurns;
 
     public Game(Player[] players, int numPlayers) {
         this.players = players;
         this.board = Board.initializeTiles();
         this.dice = new Dice();
         this.currentPlayerIndex = 0;
-        this.jailTurns = new int[players.length];
     }
 
     public void playTurn() {
         Player currentPlayer = players[currentPlayerIndex];
-        System.out.println(currentPlayer.isEliminated());
         String name = currentPlayer.getName();
         int location = currentPlayer.getPosition();
         int balance = currentPlayer.getBalance();
@@ -39,7 +37,8 @@ public class Game {
             int newPosition = (location + totalRoll) % board.length;
             if (newPosition < location) {
                 currentPlayer.addBalance(200);
-                System.out.println(currentPlayer.getName() + " gets $200 for passing GO and now has " + balance);
+                currentPlayer.setPosition(newPosition);
+                System.out.println(currentPlayer.getName() + " gets $200 for passing GO and now has $" + currentPlayer.getBalance());
                 System.out.println(currentPlayer.getName() + " landed on " + board[newPosition].getName() + ".");
             } else {
                 currentPlayer.setPosition(newPosition);
@@ -57,6 +56,9 @@ public class Game {
             } else if (board[newPosition].getType() == 0) {
                 currentPlayer.setPosition(newPosition);
                 buyableProperty(currentPlayerIndex, newPosition);
+            }
+            else if (board[newPosition].getType() == 3) {
+                currentPlayer.setPosition(newPosition);
             }
         }
         currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
@@ -81,15 +83,14 @@ public class Game {
         return false;
     }
 
-
-
     private void handleJailLogic(Player currentPlayer) {
-        if (jailTurns[currentPlayerIndex] == 3) {
+        int turns = currentPlayer.getJailTurns();
+        if (turns == 3) {
             System.out.println(currentPlayer.getName() + " has spent 3 turns in jail and must pay $200 to get out.");
             currentPlayer.deductBalance(200);
             System.out.println(currentPlayer.getName() + " now has: $" + currentPlayer.getBalance());
             currentPlayer.setInJail(false);
-            jailTurns[currentPlayerIndex] = 0;
+            currentPlayer.resetJailTurns();
         } else {
             int[] rolls = dice.rollTwoDice();
             int totalRoll = rolls[0] + rolls[1];
@@ -100,10 +101,10 @@ public class Game {
                 currentPlayer.setInJail(false);
                 currentPlayer.setPosition((currentPlayer.getPosition() + totalRoll) % board.length);
                 System.out.println(currentPlayer.getName() + " moved to " + board[currentPlayer.getPosition()].getName() + ".");
-                jailTurns[currentPlayerIndex] = 0;
+                currentPlayer.resetJailTurns();
             } else {
                 System.out.println(currentPlayer.getName() + " failed to roll doubles and remains in jail.");
-                jailTurns[currentPlayerIndex]++;
+                currentPlayer.increaseJailTurns();
             }
         }
     }
@@ -113,7 +114,7 @@ public class Game {
         currentPlayer.setInJail(true);
         currentPlayer.setPosition(board[10].getTileNumber());
         System.out.println(currentPlayer.getName() + " is in jail.");
-        jailTurns[currentPlayerIndex] = 0;
+        currentPlayer.resetJailTurns();
     }
 
     public void payTax(int index) {
@@ -152,7 +153,7 @@ public class Game {
             String choice = sc.nextLine();
 
             if (choice.equalsIgnoreCase("Y")) {
-                if (currentPlayer.getBalance() >= propertyPrice) {
+                if (currentPlayer.getBalance() >= propertyPrice + 1) {
                     currentPlayer.deductBalance(propertyPrice);
                     tile.setOwner(index);
                     System.out.println(currentPlayer.getName() + " has purchased " + propertyName + ".");

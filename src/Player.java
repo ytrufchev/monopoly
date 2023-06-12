@@ -3,13 +3,24 @@ public class Player {
     private int balance;
     private int position;
     private boolean inJail;
-
+    private int jailTurns;
     private boolean isEliminated;
 
     public Player(String name) {
         this.name = name;
         this.balance = 150;
         this.position = 0;
+        this.jailTurns = 0;
+    }
+
+    public int getJailTurns() {
+        return jailTurns;
+    }
+    public void increaseJailTurns(){
+        this.jailTurns++;
+    }
+    public void resetJailTurns(){
+        this.jailTurns = 0;
     }
 
     public String getName() {
