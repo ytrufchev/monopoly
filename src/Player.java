@@ -11,7 +11,7 @@ public class Player {
 
     public Player(String name) {
         this.name = name;
-        this.balance = 150;
+        this.balance = 1500;
         this.position = 0;
         this.jailTurns = 0;
         this.properties = new ArrayList<>();

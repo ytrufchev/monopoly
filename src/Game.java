@@ -1,6 +1,8 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Map;
 
 public class Game {
     private final Player[] players;
@@ -32,8 +34,34 @@ public class Game {
         currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
     }
     public void mortgageProperties(Player currentPlayer){
-        ArrayList properties = currentPlayer.getProperties();
-        System.out.println(properties);
+        HashMap<String, Integer> properties = new HashMap<String, Integer>();
+        for (int i = 0; i < board.length; i++) {
+            if (board[i].getOwner() == currentPlayerIndex && !board[i].isMortgaged()) {
+                properties.put(board[i].getName(), i);
+            }
+        }
+
+        int position = 1;
+        for (Map.Entry<String, Integer> entry : properties.entrySet()) {
+            System.out.println(position + ". You can mortgage " + entry.getKey() + " for $" + board[entry.getValue()].getMortgageValue());
+            position++;
+        }
+
+        System.out.println("Choose a property to mortgage (enter the corresponding number): ");
+        Scanner sc = new Scanner(System.in);
+        int selection = sc.nextInt();
+
+        if (selection >= 1 && selection <= properties.size()) {
+            int propertyIndex = (int) properties.values().toArray()[selection - 1];
+            board[propertyIndex].setMortgaged(true);
+            int mortgageValue = board[propertyIndex].getMortgageValue();
+            currentPlayer.addBalance(mortgageValue);
+            System.out.println("You have mortgaged " + board[propertyIndex].getName() + " for $" + mortgageValue);
+            System.out.println("Your new balance is $" + currentPlayer.getBalance());
+        } else {
+            System.out.println("Invalid selection!");
+        }
+
     }
     public void startTurn(Player currentPlayer){
         if (currentPlayer.isInJail()) {
