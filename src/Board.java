@@ -15,8 +15,8 @@ public class Board {
         this.price = price;
         this.rent = rent;
         this.mortgageValue = mortgageValue;
-        this.owner = null; // Initially, no owner
-        this.mortgaged = false; // Initially, not mortgaged
+        this.owner = null;
+        this.mortgaged = false;
         this.type = type;
     }
 
