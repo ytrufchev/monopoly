@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 public class Player {
     private String name;
     private int balance;
@@ -5,14 +7,25 @@ public class Player {
     private boolean inJail;
     private int jailTurns;
     private boolean isEliminated;
+    private ArrayList<Integer> properties;
 
     public Player(String name) {
         this.name = name;
         this.balance = 150;
         this.position = 0;
         this.jailTurns = 0;
+        this.properties = new ArrayList<>();
     }
 
+    public ArrayList getProperties(){
+        return properties;
+    }
+    public void addProperty(int property){
+        this.properties.add(property);
+    }
+    public void clearProperties(){
+        this.properties.clear();
+    }
     public int getJailTurns() {
         return jailTurns;
     }

@@ -17,7 +17,7 @@ public class Main {
             players[i] = player;
         }
 
-        Game game = new Game(players, numPlayers);
+        Game game = new Game(players);
         while (!game.isGameOver()) {
             game.playTurn();
         }

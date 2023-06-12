@@ -1,5 +1,4 @@
 public class Board {
-    private int tileNumber;
     private String name;
     private int price;
     private int rent;
@@ -10,7 +9,6 @@ public class Board {
     private int type;
 
     public Board(String name, int price, int rent, int mortgageValue, int owner, boolean mortgaged, int type) {
-        this.tileNumber = tileNumber;
         this.name = name;
         this.price = price;
         this.rent = rent;
@@ -18,10 +16,6 @@ public class Board {
         this.owner = owner;
         this.mortgaged = false;
         this.type = type;
-    }
-
-    public int getTileNumber() {
-        return tileNumber;
     }
 
     public String getName() {
