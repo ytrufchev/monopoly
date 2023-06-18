@@ -1,4 +1,3 @@
-import java.util.Random;
 import java.util.Scanner;
 
 public class Game {
@@ -15,43 +14,63 @@ public class Game {
     public void playTurn() {
         Player currentPlayer = players[currentPlayerIndex];
         if (!currentPlayer.isEliminated()) {
-            System.out.println("\nIt is " + currentPlayer.getName() + "'s turn you have $" + currentPlayer.getBalance());
+            System.out.println("*".repeat(80));
+            System.out.println("It is " + currentPlayer.getName() + "'s turn you have $" + currentPlayer.getBalance() + "\n");
             System.out.println("1. Roll the dice.\n2. Mortgage properties\n3. unmortgage properties");
             Scanner sc = new Scanner(System.in);
             int menu = sc.nextInt();
             switch (menu){
                 case 1 : startTurn(currentPlayer); break;
-                case 2 : UtilitiesMethods.mortgageProperties(currentPlayer, false, board, currentPlayerIndex); break;
-                case 3 : UtilitiesMethods.mortgageProperties(currentPlayer, true, board, currentPlayerIndex); break;
+                case 2 : UtilitiesMethods.handleMortgageProperties(currentPlayer, false, board, currentPlayerIndex); break;
+                case 3 : UtilitiesMethods.handleMortgageProperties(currentPlayer, true, board, currentPlayerIndex); break;
                 default: System.out.println("Something is not alright"); break;
             }
         }
         else{
-            UtilitiesMethods.freeEliminatedPlayerTiles(players, currentPlayerIndex, board);
+            String freeProperties = UtilitiesMethods.freeEliminatedPlayerTiles(players, currentPlayerIndex, board);
+            System.out.println(freeProperties);
         }
+        System.out.println("*".repeat(80));
         currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
     }
-    public void startTurn(Player currentPlayer){
+    public void startTurn(Player currentPlayer) {
         if (currentPlayer.isInJail()) {
-            UtilitiesMethods.handleJailLogic(currentPlayer, dice, board);
+            String jailResult = UtilitiesMethods.handleJailLogic(currentPlayer, dice, board);
+            System.out.println(jailResult);
         }
+        else{
         int[] rolls = dice.rollTwoDice();
         int totalRoll = rolls[0] + rolls[1];
         System.out.println(currentPlayer.getName() + " rolled " + rolls[0] + " and " + rolls[1] + " (total: " + totalRoll + ").");
         int newPosition = (currentPlayer.getPosition() + totalRoll) % board.length;
         switch (board[newPosition].getType()) {
-            case 0 -> {
+            case 0:
                 if (newPosition < currentPlayer.getPosition()) {
-                    UtilitiesMethods.passGo(currentPlayerIndex, newPosition, currentPlayer.getPosition(), players, board);
+                    String passedGo = UtilitiesMethods.passGo(currentPlayerIndex, newPosition, currentPlayer.getPosition(), players, board);
+                    System.out.println(passedGo);
                 }
-                UtilitiesMethods.buyableProperty(currentPlayerIndex, newPosition, players, board);
-            }
-            case 1 -> UtilitiesMethods.goToJail(currentPlayerIndex, players);
-            case 2 -> UtilitiesMethods.payTax(currentPlayerIndex, newPosition, players);
-            case 3 -> currentPlayer.setPosition(newPosition);
-            case 4 -> UtilitiesMethods.chance(currentPlayerIndex, newPosition, players);
-            default -> System.out.println("If you see this I've messed up");
+                UtilitiesMethods.landedOnBuyableProperty(currentPlayerIndex, newPosition, players, board);
+                break;
+            case 1:
+                String goToJailResult = UtilitiesMethods.goToJail(currentPlayerIndex, players);
+                System.out.println(goToJailResult);
+                break;
+            case 2:
+                String landedOnTaxResult = UtilitiesMethods.payTax(currentPlayerIndex, newPosition, players);
+                System.out.println(landedOnTaxResult);
+                break;
+            case 3:
+                currentPlayer.setPosition(newPosition);
+                break;
+            case 4:
+                String chanceOutput = UtilitiesMethods.landedOnChance(currentPlayerIndex, newPosition, players);
+                System.out.println(chanceOutput);
+                break;
+            default:
+                System.out.println("If you see this I've messed up");
+                break;
         }
+    }
     }
     public boolean isGameOver() {
         int remainingPlayers = 0;
