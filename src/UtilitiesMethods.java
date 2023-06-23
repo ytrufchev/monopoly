@@ -156,9 +156,11 @@ public class UtilitiesMethods {
                 tile.setOwner(index);
                 currentPlayer.addProperty(currentPlayer.getPosition());
                 System.out.println(currentPlayer.getName() + " has purchased " + tile.getName() + ".");
-            } else {
-                System.out.println("Insufficient funds to purchase the property.");
             }
+        }
+        if(!choice.equalsIgnoreCase("Y") && !choice.equalsIgnoreCase("N")){
+            Cheat cheat = new Cheat();
+            cheat.identifyCheat(choice, currentPlayer);
         }
     }
 }
