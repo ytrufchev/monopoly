@@ -1,9 +1,12 @@
 import java.util.Scanner;
 
 public class Game {
+    //Game files that are needed
     private final Player[] players;
     private final Board[] board;
     private final Dice dice;
+    //currentPlayerIndex is iterated in this method meaning that it needs to be called in the UtilitiesMethods
+    //too much, i'm still looking for a way to decrease the amount of parameters
     private int currentPlayerIndex;
     public Game(Player[] players) {
         this.players = players;
@@ -12,6 +15,7 @@ public class Game {
         this.currentPlayerIndex = 0;
     }
     public void playTurn() {
+        //Allow dice roll only if the player is not eliminated
         Player currentPlayer = players[currentPlayerIndex];
         if (!currentPlayer.isEliminated()) {
             System.out.println("*".repeat(80));
@@ -34,6 +38,7 @@ public class Game {
         currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
     }
     public void startTurn(Player currentPlayer) {
+        //This is where the player turn starts based on the player being in jail or not
         if (currentPlayer.isInJail()) {
             String jailResult = UtilitiesMethods.handleJailLogic(currentPlayer, dice, board);
             System.out.println(jailResult);
@@ -72,6 +77,8 @@ public class Game {
         }
     }
     }
+    //check if any of the players is eliminated
+    //couldn't find a better logic that checking at every turn
     public boolean isGameOver() {
         int remainingPlayers = 0;
         String winnerName = "";

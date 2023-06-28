@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 
 public class Player {
+    //field needed for each player
     private String name;
     private int balance;
     private int position;
@@ -10,6 +11,7 @@ public class Player {
     private ArrayList<Integer> properties;
 
     public Player(String name) {
+        //Player constructor with some default values
         this.name = name;
         this.balance = 1500;
         this.position = 0;
@@ -23,9 +25,12 @@ public class Player {
     public void addProperty(int property){
         this.properties.add(property);
     }
+    //Used to free up the player properties when eliminated
     public void clearProperties(){
         this.properties.clear();
     }
+    //The three methods below change, reset or get the turns spent in jail to
+    //allow the player to leave after three turns in jail
     public int getJailTurns() {
         return jailTurns;
     }
@@ -47,10 +52,11 @@ public class Player {
     public int getPosition() {
         return position;
     }
-
+    //This is for moving the player on the board
     public void setPosition(int position) {
         this.position = position;
     }
+    //Check if the player is eliminated
     public boolean isEliminated(){
         return isEliminated;
     }

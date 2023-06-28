@@ -1,4 +1,5 @@
 public class Board {
+    //Filed for the properties on the board
     private String name;
     private int price;
     private int rent;
@@ -7,7 +8,7 @@ public class Board {
     private boolean mortgaged;
 
     private int type;
-
+    //Constructor for the board tiles
     public Board(String name, int price, int rent, int mortgageValue, int owner, boolean mortgaged, int type) {
         this.name = name;
         this.price = price;
@@ -45,6 +46,7 @@ public class Board {
     public boolean isMortgaged() {
         return mortgaged;
     }
+    //Type is used to help with identifying what actions can be make with the tile
     public int getType() {
         return type;
     }

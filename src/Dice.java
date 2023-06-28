@@ -5,7 +5,7 @@ public class Dice {
         Random random = new Random();
         return random.nextInt(6) + 1;
     }
-
+    //simple two dice roll
     public int[] rollTwoDice() {
         int[] rolls = new int[2];
         rolls[0] = roll();

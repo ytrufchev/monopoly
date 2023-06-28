@@ -4,6 +4,8 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class UtilitiesMethods {
+    //Handle mortgage and unmortgage based on the player selection.
+    //I am happy I thought of it after seeing two identical methods for a different operation
     public static void handleMortgageProperties(Player currentPlayer, boolean operation, Board[] board, int currentPlayerIndex) {
         String opString;
         if (!operation) {
@@ -48,6 +50,8 @@ public class UtilitiesMethods {
             System.out.println("Invalid selection!");
         }
     }
+    //If a player gets eliminated go through all the tiles and if owner is set to this player
+    //set new owner to default value of -1
     public static String freeEliminatedPlayerTiles(Player[] players, int currentPlayerIndex, Board[] board){
         for (Board value : board) {
             if (value.getOwner() == currentPlayerIndex) {
@@ -57,6 +61,7 @@ public class UtilitiesMethods {
         players[currentPlayerIndex].clearProperties();
         return "Player " + players[currentPlayerIndex].getName() + " is eliminated and his properties are now unoccupied";
     }
+    //logic for passing the GO tile and give $200 to the player else simply move the player
     public static String passGo(int currentPlayerIndex, int newPosition, int location, Player[] players, Board[] board){
         Player currentPlayer = players[currentPlayerIndex];
         if (newPosition < location) {
@@ -69,6 +74,7 @@ public class UtilitiesMethods {
             return currentPlayer.getName() + " landed on " + board[newPosition].getName() + ".";
         }
     }
+    //Deduct money from the player if landed on tax tile
     public static String payTax(int index, int location, Player[] players) {
         Player currentPlayer = players[index];
         currentPlayer.setPosition(location);
@@ -76,6 +82,7 @@ public class UtilitiesMethods {
         currentPlayer.deductBalance(taxAmount);
         return currentPlayer.getName() + " must pay Tax of $" + taxAmount + ".";
     }
+    //Very simple implementation of a chance tile
     public static String landedOnChance(int index, int location, Player[] players) {
         Player currentPlayer = players[index];
         currentPlayer.setPosition(location);
@@ -91,6 +98,7 @@ public class UtilitiesMethods {
             return "You landed on chance and get $" + amount;
         }
     }
+    //Handling player in jail
     static String handleJailLogic(Player currentPlayer, Dice dice, Board[] board) {
         int turns = currentPlayer.getJailTurns();
         if (turns == 2) {
@@ -115,6 +123,7 @@ public class UtilitiesMethods {
             }
         }
     }
+    //Send player to jail if they land on Go to jail tile
     public static String goToJail(int index, Player[] players) {
         Player currentPlayer = players[index];
         currentPlayer.setInJail(true);
@@ -122,6 +131,7 @@ public class UtilitiesMethods {
         currentPlayer.resetJailTurns();
         return currentPlayer.getName() + " is in jail.";
     }
+    //Check if player is on a property that can be bought and who owns it
     public static void landedOnBuyableProperty(int currentPlayerIndex, int location, Player[] players, Board[] board) {
         Player currentPlayer = players[currentPlayerIndex];
         currentPlayer.setPosition(location);
@@ -136,7 +146,7 @@ public class UtilitiesMethods {
             }
         }
     }
-
+    //Pay rent to the tile owner based on the rent price of the tile
     private static void tileOwnedByAnotherPlayer(Board tile, int currentPlayerIndex, Player[] players) {
         System.out.println("This property is owned by " + players[tile.getOwner()].getName() + ".");
         System.out.println(players[currentPlayerIndex].getName() + " must pay $" + tile.getRent() + " as rent to " + players[tile.getOwner()].getName() + ".");
@@ -145,6 +155,8 @@ public class UtilitiesMethods {
         System.out.println(players[currentPlayerIndex].getName() + " payed $" + tile.getRent() + " to " + players[tile.getOwner()].getName());
     }
 
+    //Offer the player to buy the property if no one owns it
+    //This is where cheats can be used
     private static void tileNotOwnedAndAffordable(Board tile, Player currentPlayer, int index) {
         System.out.println("You landed on " + tile.getName() + " it is not owned by anyone.");
         System.out.println("Do you want to buy it for $" + tile.getPrice() + "? (Y/N)");
